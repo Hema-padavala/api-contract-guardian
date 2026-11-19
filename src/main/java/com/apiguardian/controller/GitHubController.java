@@ -65,4 +65,43 @@ public List<Map<String, Object>> getChangedJavaFiles(
 
     return gitHubDiffService.extractChangedFiles(comparison);
 }
+@GetMapping("/java-patches")
+public List<String> getJavaPatches(
+        @RequestParam String owner,
+        @RequestParam String repo,
+        @RequestParam String base,
+        @RequestParam String head) {
+
+    Map<String, Object> comparison =
+            (Map<String, Object>) gitHubService.compareCommits(
+                    owner, repo, base, head);
+
+    return gitHubDiffService.extractJavaPatches(comparison);
+}
+@GetMapping("/analyze-java-changes")
+public List<String> analyzeJavaChanges(
+        @RequestParam String owner,
+        @RequestParam String repo,
+        @RequestParam String base,
+        @RequestParam String head) {
+
+    Map<String, Object> comparison =
+            (Map<String, Object>) gitHubService.compareCommits(
+                    owner, repo, base, head);
+
+    return gitHubDiffService.explainJavaPatches(comparison);
+}
+@GetMapping("/files-by-status")
+public Map<String, List<Map<String, Object>>> getFilesByStatus(
+        @RequestParam String owner,
+        @RequestParam String repo,
+        @RequestParam String base,
+        @RequestParam String head) {
+
+    Map<String, Object> comparison =
+            (Map<String, Object>) gitHubService.compareCommits(
+                    owner, repo, base, head);
+
+    return gitHubDiffService.groupFilesByStatus(comparison);
+}
 }
