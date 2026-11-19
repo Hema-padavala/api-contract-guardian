@@ -21,7 +21,7 @@ public class GitHubService {
     public Map<?, ?> getRepositoryInfo(String owner, String repo) {
 
         return restClient.get()
-                .uri("/repos/{owner}/{repo}", owner, repo)
+        		.uri("/repos/{owner}/{repo}?test=true", owner, repo)
                 .header("Accept", "application/vnd.github+json")
                 .retrieve()
                 .body(Map.class);
@@ -71,4 +71,5 @@ public String getFileContent(
 
     return new String(decoded, StandardCharsets.UTF_8);
 }
+
 }
