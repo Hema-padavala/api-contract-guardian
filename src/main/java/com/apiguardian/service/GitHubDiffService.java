@@ -4,15 +4,22 @@ package com.apiguardian.service;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
+import java.util.ArrayList;
+import java.util.HashMap;
 import org.springframework.stereotype.Service;
 import com.apiguardian.service.OllamaService;
+import com.apiguardian.service.JavaSourceAnalysisService;
 @Service
 public class GitHubDiffService {
 	private final OllamaService ollamaService;
+	private final JavaSourceAnalysisService analysisService;
 
-	public GitHubDiffService(OllamaService ollamaService) {
+	public GitHubDiffService(
+	        OllamaService ollamaService,
+	        JavaSourceAnalysisService analysisService) {
+
 	    this.ollamaService = ollamaService;
+	    this.analysisService = analysisService;
 	}
     public List<Map<String, Object>> extractChangedFiles(
             Map<String, Object> comparison) {
@@ -92,8 +99,60 @@ public class GitHubDiffService {
 
         List<Map<String, Object>> files = extractChangedFiles(comparison);
 
-        return files.stream()
-                .collect(Collectors.groupingBy(
-                        file -> (String) file.get("status")));
+        Map<String, List<Map<String, Object>>> result = new HashMap<>();
+
+        result.put("added", new ArrayList<>());
+        result.put("modified", new ArrayList<>());
+        result.put("removed", new ArrayList<>());
+
+        for (Map<String, Object> file : files) {
+            String status = (String) file.get("status");
+
+            if (result.containsKey(status)) {
+                result.get(status).add(file);
+            }
+        }
+
+        return result;
     }
+    public Map<String, Object> generateChangeReport(
+            Map<String, Object> comparison) {
+
+        Map<String, Object> report = new HashMap<>();
+
+        report.put("filesByStatus", groupFilesByStatus(comparison));
+        report.put("javaPatches", extractJavaPatches(comparison));
+        report.put("aiExplanations", explainJavaPatches(comparison));
+
+        return report;
+    }
+    public Map<String, Object> compareGitHubJavaFiles(
+            String oldSource, String newSource) {
+
+        Map<String, Object> result = new HashMap<>();
+
+        result.put("oldClassName",
+                analysisService.extractClassName(oldSource));
+
+        result.put("newClassName",
+                analysisService.extractClassName(newSource));
+
+        result.put("methodComparison",
+                analysisService.compareMethods(oldSource, newSource));
+
+        result.put("returnTypeComparison",
+                analysisService.compareReturnTypes(oldSource, newSource));
+
+        result.put("endpointComparison",
+                analysisService.compareEndpoints(oldSource, newSource));
+
+        result.put("modifiedMethods",
+                analysisService.detectModifiedMethods(oldSource, newSource));
+
+        result.put("endpointImplementationChanges",
+                analysisService.compareEndpointImplementations(
+                        oldSource, newSource));
+
+        return result;
+    } 
 }

@@ -2,13 +2,16 @@
 package com.apiguardian.service;
 
 import java.util.Map;
-
+import java.util.List;
+import java.util.Map;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 @Service
 public class GitHubService {
-	// Testing GitHub Java file detection
+	// Testing modified Java file detection
     private final RestClient restClient;
 
     public GitHubService() {
@@ -44,5 +47,28 @@ public Object compareCommits(
             .retrieve()
             .body(Object.class);
 }
+public List<Map<String, Object>> getLatestCommit(String owner, String repo) {
 
+    return (List<Map<String, Object>>) restClient.get()
+            .uri("/repos/{owner}/{repo}/commits?per_page=1", owner, repo)
+            .header("Accept", "application/vnd.github+json")
+            .retrieve()
+            .body(List.class);
+}
+public String getFileContent(
+        String owner, String repo, String path, String ref) {
+
+    Map<?, ?> response = restClient.get()
+            .uri("/repos/{owner}/{repo}/contents/{path}?ref={ref}",
+                    owner, repo, path, ref)
+            .header("Accept", "application/vnd.github+json")
+            .retrieve()
+            .body(Map.class);
+
+    String content = (String) response.get("content");
+
+    byte[] decoded = Base64.getMimeDecoder().decode(content);
+
+    return new String(decoded, StandardCharsets.UTF_8);
+}
 }
