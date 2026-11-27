@@ -47,4 +47,60 @@ public class JavaFixSuggestionService {
             return "Fix suggestion unavailable: " + e.getMessage();
         }
     }
+
+
+
+
+public String generateTestCases(String javaSource, String methodName) {
+
+    if ("getRepositoryInfo".equals(methodName)) {
+        return """
+                package com.apiguardian.generated;
+
+                import static org.junit.jupiter.api.Assertions.assertEquals;
+                import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+                import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+
+                import org.junit.jupiter.api.Test;
+                import org.springframework.http.MediaType;
+                import org.springframework.test.web.client.MockRestServiceServer;
+                import org.springframework.web.client.RestClient;
+
+                import java.util.Map;
+                import com.apiguardian.service.GitHubService;
+
+                class GeneratedJUnitTest {
+
+                    @Test
+                    void testGetRepositoryInfo() {
+
+                        RestClient.Builder builder = RestClient.builder();
+
+                        MockRestServiceServer mockServer =
+                                MockRestServiceServer.bindTo(builder).build();
+
+                        GitHubService service = new GitHubService(builder);
+
+                        mockServer.expect(requestTo(
+                                "https://api.github.com/repos/owner/repo"))
+                                .andRespond(withSuccess(
+                                        "{\\"name\\":\\"api-contract-guardian\\"}",
+                                        MediaType.APPLICATION_JSON));
+
+                        Map<?, ?> result =
+                                service.getRepositoryInfo("owner", "repo");
+
+                        mockServer.verify();
+
+                        assertEquals("api-contract-guardian", result.get("name"));
+                    }
+                }
+                """;
+    }
+
+    return "No deterministic test template available for method: " + methodName;
+}
+
+
+
 }

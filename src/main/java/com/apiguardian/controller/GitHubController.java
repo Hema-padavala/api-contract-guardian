@@ -177,4 +177,117 @@ public Map<String, Object> compareGitHubJavaFiles(
     return gitHubDiffService.compareGitHubJavaFiles(
             oldSource, newSource);
 }
+@GetMapping("/fix-suggestions")
+public Map<String, String> getGitHubFixSuggestions(
+        @RequestParam String owner,
+        @RequestParam String repo,
+        @RequestParam String path,
+        @RequestParam String base,
+        @RequestParam String head) {
+
+    String oldSource = gitHubService.getFileContent(
+            owner, repo, path, base);
+
+    String newSource = gitHubService.getFileContent(
+            owner, repo, path, head);
+
+    return gitHubDiffService.generateGitHubFixSuggestions(
+            oldSource, newSource);
+}
+@GetMapping("/validate-fixes")
+public Map<String, String> validateGitHubFixes(
+        @RequestParam String owner,
+        @RequestParam String repo,
+        @RequestParam String path,
+        @RequestParam String base,
+        @RequestParam String head) {
+
+    String oldSource = gitHubService.getFileContent(
+            owner, repo, path, base);
+
+    String newSource = gitHubService.getFileContent(
+            owner, repo, path, head);
+
+    Map<String, String> suggestions =
+            gitHubDiffService.generateGitHubFixSuggestions(
+                    oldSource, newSource);
+
+    return gitHubDiffService.validateGitHubFixSuggestions(
+            oldSource, newSource, suggestions);
+}
+@GetMapping("/verify-fix-quality")
+public Map<String, String> verifyFixQuality(
+        @RequestParam String owner,
+        @RequestParam String repo,
+        @RequestParam String path,
+        @RequestParam String base,
+        @RequestParam String head) {
+
+    String oldSource =
+            gitHubService.getFileContent(owner, repo, path, base);
+
+    String newSource =
+            gitHubService.getFileContent(owner, repo, path, head);
+
+    Map<String, String> suggestions =
+            gitHubDiffService.generateGitHubFixSuggestions(
+                    oldSource, newSource);
+
+    return gitHubDiffService.verifyFixQuality(
+            oldSource, newSource, suggestions);
+}
+@GetMapping("/generate-test-cases")
+public Map<String, String> generateTestCases(
+        @RequestParam String owner,
+        @RequestParam String repo,
+        @RequestParam String path,
+        @RequestParam String base,
+        @RequestParam String head) {
+
+    String oldSource =
+            gitHubService.getFileContent(owner, repo, path, base);
+
+    String newSource =
+            gitHubService.getFileContent(owner, repo, path, head);
+
+    return gitHubDiffService.generateGitHubTestCases(
+            oldSource, newSource);
+}
+
+@GetMapping("/run-generated-tests")
+public Map<String, String> runGeneratedTests(
+        @RequestParam String owner,
+        @RequestParam String repo,
+        @RequestParam String path,
+        @RequestParam String base,
+        @RequestParam String head) {
+
+    String oldSource =
+            gitHubService.getFileContent(owner, repo, path, base);
+
+    String newSource =
+            gitHubService.getFileContent(owner, repo, path, head);
+
+    return gitHubDiffService.generateAndRunGitHubTestCases(
+            oldSource, newSource);
+}
+
+@GetMapping("/automatic-test-report")
+public Map<String, Object> getAutomaticTestReport(
+        @RequestParam String owner,
+        @RequestParam String repo,
+        @RequestParam String path,
+        @RequestParam String base,
+        @RequestParam String head) {
+
+    String oldSource = gitHubService.getFileContent(
+            owner, repo, path, base);
+
+    String newSource = gitHubService.getFileContent(
+            owner, repo, path, head);
+
+    return gitHubDiffService.generateAutomaticTestReport(
+            oldSource, newSource);
+}
+
 }

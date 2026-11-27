@@ -145,46 +145,32 @@ public class JavaSourceAnalysisService {
 
         return result;
     }
-    public Map<String, List<String>> detectModifiedMethods(
-            String oldSource,
-            String newSource) {
 
-        Map<String, List<String>> result = new HashMap<>();
+public Map<String, List<String>> detectModifiedMethods(
+        String oldSource,
+        String newSource) {
 
-        List<String> modified = new ArrayList<>();
+    Map<String, List<String>> result = new HashMap<>();
+    List<String> modified = new ArrayList<>();
 
-        Pattern pattern = Pattern.compile(
-                "(public|private|protected)\\s+" +
-                "[\\w<>\\[\\], ?]+?\\s+" +
-                "(\\w+)\\s*\\([^{};]*\\)\\s*\\{([^{}]*)\\}"
-        );
+    Map<String, String> oldMethods = extractMethodBodies(oldSource);
+    Map<String, String> newMethods = extractMethodBodies(newSource);
 
-        Map<String, String> oldMethods = new HashMap<>();
-        Map<String, String> newMethods = new HashMap<>();
+    for (String methodName : oldMethods.keySet()) {
 
-        Matcher oldMatcher = pattern.matcher(oldSource);
-        while (oldMatcher.find()) {
-            oldMethods.put(oldMatcher.group(2), oldMatcher.group(3).trim());
+        if (newMethods.containsKey(methodName)
+                && !oldMethods.get(methodName).trim()
+                        .equals(newMethods.get(methodName).trim())) {
+
+            modified.add(methodName);
         }
-
-        Matcher newMatcher = pattern.matcher(newSource);
-        while (newMatcher.find()) {
-            newMethods.put(newMatcher.group(2), newMatcher.group(3).trim());
-        }
-
-        for (String methodName : oldMethods.keySet()) {
-
-            if (newMethods.containsKey(methodName)
-                    && !oldMethods.get(methodName).equals(newMethods.get(methodName))) {
-
-                modified.add(methodName);
-            }
-        }
-
-        result.put("modifiedMethods", modified);
-
-        return result;
     }
+
+    result.put("modifiedMethods", modified);
+
+    return result;
+}
+
     public List<String> extractEndpoints(String sourceCode) {
 
         List<String> endpoints = new ArrayList<>();
