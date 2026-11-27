@@ -3,10 +3,15 @@ package com.apiguardian.demo;
 public class Calculator {
 
     public int add(int a, int b) {
-        return a + b;
+        int result = a + b;
+        return result;
     }
 
     public int subtract(int a, int b) {
         return a - b;
+    }
+
+    public int multiply(int a, int b) {
+        return a * b;
     }
 }
